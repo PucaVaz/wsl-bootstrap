@@ -70,9 +70,8 @@ if ! command -v claude >/dev/null; then
 fi
 
 # ---------------------------------------------------------------- sshd
-log "sshd: key-only auth"
-sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-sudo sed -i 's/^#\?KbdInteractiveAuthentication.*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
+log "sshd: password auth enabled (box is Tailscale-only; harden to key-only later)"
+sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 sudo systemctl enable ssh 2>/dev/null || true
 sudo service ssh restart || sudo service ssh start
 mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
@@ -99,7 +98,8 @@ cat <<'EOF'
  2. git config --global user.name "Puca Vaz"; git config --global user.email <your email>
  3. doppler login
  4. claude                      (login on first run)
- 5. Paste your phone's SSH public key into ~/.ssh/authorized_keys
+ 5. (later, optional hardening) phone SSH key -> ~/.ssh/authorized_keys, then set
+    PasswordAuthentication no in /etc/ssh/sshd_config and: sudo service ssh restart
  6. gh repo clone Telepatia-AI/monobloco ~/monobloco && cd ~/monobloco && make setup
  7. Windows side: Tailscale (sign in, "run unattended"), Cloudflare WARP (enroll telepatia org),
     .wslconfig with [wsl2] networkingMode=mirrored, then: wsl --shutdown
